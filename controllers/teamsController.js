@@ -1,10 +1,15 @@
 const teamsModel = require('../models/teamModel');
+const positionsModel = require('../models/positionModel');
 const fs = require('fs');
 const path = require('path');
 
 const getAllTeams = async (req, res) => {
     try {
-        const teams = await teamsModel.findAll();
+        const teams = await teamsModel.findAll({
+            include: {
+                model: positionsModel
+            }
+        });
         res.json(teams);
     } catch (error) {
         console.error(error);
