@@ -4,7 +4,7 @@ const router = express.Router();
 const upload = require('../services/upload');
 const adminOnly = require('../middlewares/adminOnly');
 
-router.get('/', adminOnly, teamsController.getAllTeams);
+router.get('/', teamsController.getAllTeams);
 router.post('/add', upload.single('Image'), adminOnly, teamsController.addTeam);
 
 module.exports = router;
