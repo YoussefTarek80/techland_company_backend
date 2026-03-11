@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
+const { link } = require('../routes/positionsRoute');
 
 const Project = sequelize.define('Project', {
   name: {
@@ -12,6 +13,30 @@ const Project = sequelize.define('Project', {
   },
   Image: {
     type: DataTypes.STRING, 
+    allowNull: true
+  },
+  industry:{
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  servicesType:{
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  client:{
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  challenges:{
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  solutions:{
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  link:{
+    type: DataTypes.STRING,
     allowNull: true
   }
 }, { timestamps: true });
