@@ -5,10 +5,10 @@ const Feedbacks = require('../models/feedbacksModel');
 Feedbacks.sync({alter: true})
 exports.createFeedback = async (req, res) => {
     try {
-        const { name, email, message, rating, company_position } = req.body;
+        const { name, email, message, rating, position,company_name } = req.body;
 
         // Validation بسيط
-        if (!name || !email || !message || !rating || !company_position) {
+        if (!name || !email || !message || !rating || !company_name || !position) {
             return res.status(400).json({
                 message: 'All fields are required'
             });
@@ -19,7 +19,8 @@ exports.createFeedback = async (req, res) => {
             email,
             message,
             rating,
-            company_position
+            position,
+            company_name
         });
 
         res.status(201).json({

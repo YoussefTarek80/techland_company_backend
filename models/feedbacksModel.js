@@ -12,7 +12,14 @@ const Feedbacks = sequelize.define('feedbacks', {
         type: DataTypes.STRING,
         allowNull: false
     },
-
+    company_name: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    position: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     email: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -34,10 +41,7 @@ const Feedbacks = sequelize.define('feedbacks', {
             max: 5
         }
     },
-    company_position: {
-        type: DataTypes.STRING,
-        allowNull: true
-    }
+
 
 }, {
     timestamps: true
