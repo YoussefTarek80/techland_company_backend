@@ -33,6 +33,10 @@ const Feedbacks = sequelize.define('feedbacks', {
             min: 1,
             max: 5
         }
+    },
+    company_position: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 
 }, {
