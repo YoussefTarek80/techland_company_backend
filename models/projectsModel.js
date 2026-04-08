@@ -11,6 +11,10 @@ const Project = sequelize.define('Project', {
     type: DataTypes.TEXT,
     allowNull: true
   },
+  description_ar: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
   Image: {
     type: DataTypes.STRING, 
     allowNull: true
