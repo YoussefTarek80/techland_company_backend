@@ -18,6 +18,7 @@ const addProject = async (req, res) => {
     const {
       name,
       description,
+      description_ar,
       industry,
       servicesType,
       client,
@@ -28,6 +29,7 @@ const addProject = async (req, res) => {
     const project = await projectsModel.create({
       name,
       description,
+      description_ar,
       Image: req.file ? `${process.env.url}/uploads/${req.file.filename}` : null,
       industry,
       servicesType,
@@ -58,6 +60,7 @@ const updateProject = async (req, res) => {
     const {
       name,
       description,
+      description_ar,
       industry,
       servicesType,
       client,
@@ -88,6 +91,7 @@ const updateProject = async (req, res) => {
     await project.update({
       name,
       description,
+      description_ar,
       Image: imagePath,
       industry,
       servicesType,
