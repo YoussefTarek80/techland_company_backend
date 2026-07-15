@@ -6,6 +6,8 @@ const MessageRoute = require("./messgesRoute");
 const AuthRoute = require("./authRoute");
 const FeedbackRoute = require("./feedbacksRoute");
 const AnalysisRoute = require("./analysisRoute");
+const jobsRoute = require("./jobsRoute");
+const jobApplicationsRoute = require("./jobApplicationsRoute");
 // ================================================================
 const mainRoute = (app) => {
   app.use("/api/v1/positions", PositionRoute);
@@ -15,6 +17,8 @@ const mainRoute = (app) => {
   app.use("/api/v1/auth", AuthRoute);
   app.use("/api/v1/feedbacks", FeedbackRoute);
   app.use("/api/v1/analysis", AnalysisRoute);
+  app.use("/api/v1/jobs", jobsRoute);
+  app.use("/api/v1/jobApplications", jobApplicationsRoute);
 
 };
 
