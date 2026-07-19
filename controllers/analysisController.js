@@ -1,13 +1,14 @@
 const Feedbacks = require('../models/feedbacksModel');
 const messageModel = require('../models/messagesModel');
 const projectsModel = require('../models/projectsModel');
+const Job = require('../models/jobsModel');
+const JobApplication = require('../models/jobApplicationsModel');
 const { Op } = require('sequelize');
 
 const getAnalysis = async (req, res) => {
     try {
         const now = new Date();
 
-        // ── Date ranges ──────────────────────────────────
         const ranges = {
             today: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
             thisWeek: new Date(now - 7 * 24 * 60 * 60 * 1000),
@@ -16,11 +17,9 @@ const getAnalysis = async (req, res) => {
             thisYear: new Date(now.getFullYear(), 0, 1),
         };
 
-        // ── Helper: count by range ────────────────────────
         const countIn = (Model, from) =>
             Model.count({ where: { createdAt: { [Op.gte]: from } } });
 
-        // ── Feedbacks ────────────────────────────────────
         const [
             feedbacks_today,
             feedbacks_week,
@@ -37,7 +36,6 @@ const getAnalysis = async (req, res) => {
             Feedbacks.count(),
         ]);
 
-        // Average rating
         const ratingResult = await Feedbacks.findOne({
             attributes: [
                 [Feedbacks.sequelize.fn('AVG', Feedbacks.sequelize.col('rating')), 'avgRating'],
@@ -46,7 +44,6 @@ const getAnalysis = async (req, res) => {
             raw: true,
         });
 
-        // Rating distribution (1-5)
         const ratingRows = await Feedbacks.findAll({
             attributes: [
                 'rating',
@@ -60,7 +57,6 @@ const getAnalysis = async (req, res) => {
             count: Number(ratingRows.find((x) => Number(x.rating) === r)?.count ?? 0),
         }));
 
-        // ── Messages ─────────────────────────────────────
         const [
             messages_today,
             messages_week,
@@ -77,7 +73,6 @@ const getAnalysis = async (req, res) => {
             messageModel.count(),
         ]);
 
-        // ── Projects ─────────────────────────────────────
         const [
             projects_today,
             projects_week,
@@ -94,7 +89,6 @@ const getAnalysis = async (req, res) => {
             projectsModel.count(),
         ]);
 
-        // Projects by industry
         const industryRows = await projectsModel.findAll({
             attributes: [
                 'industry',
@@ -104,8 +98,40 @@ const getAnalysis = async (req, res) => {
             raw: true,
         });
 
+        const [
+            jobs_today,
+            jobs_week,
+            jobs_month,
+            jobs_3months,
+            jobs_year,
+            jobs_total,
+            jobs_published,
+        ] = await Promise.all([
+            countIn(Job, ranges.today),
+            countIn(Job, ranges.thisWeek),
+            countIn(Job, ranges.thisMonth),
+            countIn(Job, ranges.last3Months),
+            countIn(Job, ranges.thisYear),
+            Job.count(),
+            Job.count({ where: { status: 'Published' } }),
+        ]);
 
-        // ── Monthly trend (last 6 months) ─────────────────
+        const [
+            applications_today,
+            applications_week,
+            applications_month,
+            applications_3months,
+            applications_year,
+            applications_total,
+        ] = await Promise.all([
+            countIn(JobApplication, ranges.today),
+            countIn(JobApplication, ranges.thisWeek),
+            countIn(JobApplication, ranges.thisMonth),
+            countIn(JobApplication, ranges.last3Months),
+            countIn(JobApplication, ranges.thisYear),
+            JobApplication.count(),
+        ]);
+
         const monthlyTrend = await Promise.all(
             Array.from({ length: 6 }, (_, i) => {
                 const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -117,13 +143,13 @@ const getAnalysis = async (req, res) => {
                     Feedbacks.count({ where: { createdAt: { [Op.between]: [from, to] } } }),
                     messageModel.count({ where: { createdAt: { [Op.between]: [from, to] } } }),
                     projectsModel.count({ where: { createdAt: { [Op.between]: [from, to] } } }),
-                ]).then(([feedbacks, messages, projects]) => ({
-                    month: label, feedbacks, messages, projects,
+                    JobApplication.count({ where: { createdAt: { [Op.between]: [from, to] } } }),
+                ]).then(([feedbacks, messages, projects, applications]) => ({
+                    month: label, feedbacks, messages, projects, applications,
                 }));
             })
         );
 
-        // ── Response ──────────────────────────────────────
         res.status(200).json({
             feedbacks: {
                 total: feedbacks_total,
@@ -152,7 +178,24 @@ const getAnalysis = async (req, res) => {
                 this_year: projects_year,
                 by_industry: industryRows.map((r) => ({ industry: r.industry || 'Other', count: Number(r.count) })),
             },
-            monthly_trend: monthlyTrend.reverse(), // oldest → newest
+            jobs: {
+                total: jobs_total,
+                published: jobs_published,
+                today: jobs_today,
+                this_week: jobs_week,
+                this_month: jobs_month,
+                last_3_months: jobs_3months,
+                this_year: jobs_year,
+            },
+            applications: {
+                total: applications_total,
+                today: applications_today,
+                this_week: applications_week,
+                this_month: applications_month,
+                last_3_months: applications_3months,
+                this_year: applications_year,
+            },
+            monthly_trend: monthlyTrend.reverse(),
         });
 
     } catch (error) {
